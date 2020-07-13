@@ -1,19 +1,17 @@
-# Template Shiny operator for Tercen
+# Boxplot Shiny operator for Tercen
 
 ##### Description
 
-The `Template Shiny operator` is a template repository for the creation of Shiny operators in Tercen.
+The `Boxplot Shiny operator` is an operator to represent data as boxplots in Tercen.
 
 ##### Usage
 
 Input projection|.
 ---|---
-`x-axis`        | type, description 
-`y-axis`        | type, description 
-`row`           | type, description 
-`column`        | type, description 
-`colors`        | type, description 
-`labels`        | type, description 
+`y-axis`        | numeric, measurement to represent 
+`row`           | factor, groups corresponding to different boxes along x axis
+`column`        | factor (optional), groups corresponding to different plot panels
+`colors`        | factor (optional), groups for corresponding to box and points coloring 
 
 Output relations|.
 ---|---
@@ -21,11 +19,8 @@ Output relations|.
 
 ##### Details
 
-The operator takes all the values of a cell and returns the value which is the median.The computation is done per cell. There is one value returned for each of the input cell.
+The operator takes all the values of a cell and represents a boxplot. Depending on the assignment of rows, columns and colors in the Tercen projection, the layout will be different.
 
 #### References
 
-
-##### See Also
-
-[templateR_operator](https://github.com/tercen/templateR_operator)
+https://en.wikipedia.org/wiki/Box_plot

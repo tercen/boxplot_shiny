@@ -1,7 +1,7 @@
 {
-  "name": "Template Shiny Operator",
-  "description": "Template to create a Shiny operator in Tercen.",
-  "tags": ["template"],
+  "name": "Boxplot Shiny Operator",
+  "description": "Create boxplots in Tercen.",
+  "tags": ["plot"],
   "authors": ["tercen"],
-  "urls": ["https://github.com/tercen/template_shiny_operator"]
+  "urls": ["https://github.com/tercen/boxplot_shiny_operator"]
 }
