@@ -4,11 +4,16 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
+# http://127.0.0.1:5402/admin/w/0364f962da893f82fef2b9549204c830/ds/594ed2cd-7212-40e4-971d-3834e1d82807
 ############################################
 #### This part should not be included in ui.R and server.R scripts
+# http://127.0.0.1:5402/admin/w/0364f962da893f82fef2b95492005f45/ds/f3b5ff7d-6c8a-4146-9412-296262090545
 getCtx <- function(session) {
-  ctx <- tercenCtx(stepId = "ad6e0cd6-afbf-4e46-b09c-fda730cdd817",
-                   workflowId = "8da5e4931be336d394b30e5ab6000abe")
+  ctx <- tercenCtx(stepId = "f3b5ff7d-6c8a-4146-9412-296262090545",
+                   workflowId = "0364f962da893f82fef2b95492005f45")
+  
+  # ctx <- tercenCtx(stepId = "594ed2cd-7212-40e4-971d-3834e1d82807",
+  #                  workflowId = "0364f962da893f82fef2b9549204c830")
   return(ctx)
 }
 ####
@@ -27,7 +32,7 @@ ui <- shinyUI(fluidPage(
     checkboxInput("log", "Log transformation", value = FALSE),
     textInput("xlab", "x axis label", "Group"),
     textInput("ylab", "y axis label", "Value")
-    ),
+  ),
   
   mainPanel(
     uiOutput("reacOut")
@@ -52,9 +57,9 @@ server <- shinyServer(function(input, output, session) {
   output$main.plot <- renderPlot({
     
     values <- dataInput()
-
+    
     df <- values$data
-    in.col <- values$colors
+    # in.col <- values$colors
     
     input.par <- list(
       notch = input$notch,
@@ -68,53 +73,58 @@ server <- shinyServer(function(input, output, session) {
     if(input.par$log) df$.y <- log1p(df$.y)
     
     fill.col <- NULL
-    if(length(unique(in.col)) > 1) fill.col <- as.factor(in.col)
-
+    # if(length(unique(in.col)) > 1) fill.col <- as.factor(in.col)
+    
     theme_set(theme_minimal())
     
-    if(!input.par$jitter) {
-      plt <- ggplot(df, aes(x = as.factor(rnames), y = .y, fill = fill.col)) + 
-        geom_boxplot(notch = input.par$notch) + labs(x = input.par$xlab, y = input.par$ylab, fill = "Legend")
+    plt <- ggplot(df, aes( x= .xLevels, y = .y, fill = fill.col)) + 
+      geom_boxplot() 
+    
+    if (length(values$ctx$colors)>0){
+      plt = plt + geom_point(aes(col=colorsValues)) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
       
     } else {
-      plt <- ggplot(df, aes(x = as.factor(rnames), y = .y)) + 
-          geom_boxplot(notch = input.par$notch) + labs(x = input.par$xlab, y = input.par$ylab) +
-          geom_jitter(aes(color = fill.col), size = 0.7)
+      plt = plt + geom_point(aes()) + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
     }
     
-    if(input.par$add.mean) plt <- plt + stat_summary(fun.y = mean, geom = "point",
-                                             shape = 18, size = 2.5, color = "#FC4E07")
+    plt = plt + labs(x = input.par$xlab, y = input.par$ylab, fill = "Legend") +
+      facet_grid( as.formula(paste0(paste(values$ctx$rnames, collapse = " + "),
+                                    "~",
+                                    paste(values$ctx$cnames, collapse = " + "))),
+                  scales = "free")
     
-    if(!is.null(df$cnames)) plt <- plt + facet_wrap(~ cnames)
-
     plt
-
+    
   })
   
 })
 
 getValues <- function(session){
-
+  
   ctx <- getCtx(session)
   
   values <- list()
   
-  values$data <- ctx %>% select(.y, .ri, .ci) %>%
-    group_by(.ri)
-
-  values$colors <- NA
-  if(length(ctx$colors)) values$colors <- ctx$select(ctx$colors[[1]])[[1]]
+  values$ctx = ctx
   
-  values$rnames <- ctx$rselect()[[1]]
-  names(values$rnames) <- seq_along(values$rnames) - 1
-  values$data$rnames <- values$rnames[as.character(values$data$.ri)]
-
-  if(nchar(values$rnames) == 0) values$data$rnames <- values$colors
+  values$data <- ctx$select(list(".y", ".ri", ".ci", ".xLevels")) 
   
-  values$cnames <- ctx$cselect()[[1]]
-  names(values$cnames) <- seq_along(values$cnames) - 1
-  values$data$cnames <- values$cnames[as.character(values$data$.ci)]
-
+  if (length(values$ctx$colors)>0){
+    colorsValues =  do.call("paste", ctx$select(ctx$colors))
+    values$data = values$data %>% mutate(colorsValues=colorsValues)
+  } 
+  
+  values$data = values$data %>%
+    mutate(ci = as.character(.ci)) %>%
+    mutate(ri = as.character(.ri))
+  
+  column = ctx$cselect() %>% mutate(.ci= (seq_len(nrow(.))-1) )
+  row = ctx$rselect() %>% mutate(.ri= (seq_len(nrow(.))-1) )
+  
+  values$data = values$data %>% 
+    left_join(column, by=".ci") %>%
+    left_join(row, by=".ri")
+  
   return(values)
 }
 
