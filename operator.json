@@ -1,6 +1,6 @@
 {
   "name": "Box Plot",
-  "description": "Displays the distribution of data based on a five number summary. Also called a box-whisker plot.",
+  "description": "Represents the distribution of data points using a boxplot.",
   "tags": [
     "data visualisation",
     "plot"
