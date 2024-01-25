@@ -1,7 +1,14 @@
 {
   "name": "Box Plot",
   "description": "Displays the distribution of data based on a five number summary. Also called a box-whisker plot.",
-  "tags": ["plot"],
-  "authors": ["tercen"],
-  "urls": ["https://github.com/tercen/boxplot_shiny_operator"]
+  "tags": [
+    "data visualisation",
+    "plot"
+  ],
+  "authors": [
+    "tercen"
+  ],
+  "urls": [
+    "https://github.com/tercen/boxplot_shiny_operator"
+  ]
 }
